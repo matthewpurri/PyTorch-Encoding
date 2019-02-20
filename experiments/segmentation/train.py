@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 
@@ -26,6 +26,7 @@ torch_ver = torch.__version__[:3]
 if torch_ver == '0.3':
     from torch.autograd import Variable
 
+
 class Trainer():
     def __init__(self, args):
         self.args = args
@@ -35,11 +36,11 @@ class Trainer():
             transform.Normalize([.485, .456, .406], [.229, .224, .225])])
         # dataset
         data_kwargs = {'transform': input_transform, 'base_size': args.base_size,
-                       'crop_size': args.crop_size}
+                       'crop_size': args.crop_size, 'vAOI': args.vAOI}
         trainset = get_dataset(args.dataset, split=args.train_split, mode='train',
-                                           **data_kwargs)
-        testset = get_dataset(args.dataset, split='val', mode ='val',
-                                           **data_kwargs)
+                               **data_kwargs)
+        testset = get_dataset(args.dataset, split='val', mode='val',
+                              **data_kwargs)
         # dataloader
         kwargs = {'num_workers': args.workers, 'pin_memory': True} \
             if args.cuda else {}
@@ -50,22 +51,22 @@ class Trainer():
         self.nclass = trainset.num_class
         # model
         model = get_segmentation_model(args.model, dataset=args.dataset,
-                                       backbone = args.backbone, aux = args.aux,
-                                       se_loss = args.se_loss, norm_layer = SyncBatchNorm,
+                                       backbone=args.backbone, aux=args.aux,
+                                       se_loss=args.se_loss, norm_layer=SyncBatchNorm,
                                        base_size=args.base_size, crop_size=args.crop_size)
-        print(model)
+        # print(model)
         # optimizer using different LR
-        params_list = [{'params': model.pretrained.parameters(), 'lr': args.lr},]
+        params_list = [{'params': model.pretrained.parameters(), 'lr': args.lr}, ]
         if hasattr(model, 'head'):
             params_list.append({'params': model.head.parameters(), 'lr': args.lr*10})
         if hasattr(model, 'auxlayer'):
             params_list.append({'params': model.auxlayer.parameters(), 'lr': args.lr*10})
         optimizer = torch.optim.SGD(params_list, lr=args.lr,
-            momentum=args.momentum, weight_decay=args.weight_decay)
+                                    momentum=args.momentum, weight_decay=args.weight_decay)
         # criterions
         self.criterion = SegmentationLosses(se_loss=args.se_loss,
                                             aux=args.aux,
-                                            nclass=self.nclass, 
+                                            nclass=self.nclass,
                                             se_weight=args.se_weight,
                                             aux_weight=args.aux_weight)
         self.model, self.optimizer = model, optimizer
@@ -122,7 +123,6 @@ class Trainer():
                 'optimizer': self.optimizer.state_dict(),
                 'best_pred': self.best_pred,
             }, self.args, is_best)
-
 
     def validation(self, epoch):
         # Fast test during the training

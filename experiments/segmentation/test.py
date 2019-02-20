@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 
@@ -21,6 +21,7 @@ from encoding.models import get_model, get_segmentation_model, MultiEvalModule
 
 from option import Options
 
+
 def test(args):
     # output folder
     outdir = 'outdir'
@@ -33,13 +34,13 @@ def test(args):
     # dataset
     if args.eval:
         testset = get_segmentation_dataset(args.dataset, split='val', mode='testval',
-                                           transform=input_transform)
+                                           transform=input_transform, vAOI=args.vAOI)
     elif args.test_val:
         testset = get_segmentation_dataset(args.dataset, split='val', mode='test',
-                                           transform=input_transform)
+                                           transform=input_transform, vAOI=args.vAOI)
     else:
         testset = get_segmentation_dataset(args.dataset, split='test', mode='test',
-                                           transform=input_transform)
+                                           transform=input_transform, vAOI=args.vAOI)
     # dataloader
     loader_kwargs = {'num_workers': args.workers, 'pin_memory': True} \
         if args.cuda else {}
@@ -53,8 +54,8 @@ def test(args):
         #model.crop_size = args.crop_size
     else:
         model = get_segmentation_model(args.model, dataset=args.dataset,
-                                       backbone = args.backbone, aux = args.aux,
-                                       se_loss = args.se_loss, norm_layer = SyncBatchNorm,
+                                       backbone=args.backbone, aux=args.aux,
+                                       se_loss=args.se_loss, norm_layer=SyncBatchNorm,
                                        base_size=args.base_size, crop_size=args.crop_size)
         # resuming checkpoint
         if args.resume is None or not os.path.isfile(args.resume):
@@ -78,7 +79,7 @@ def test(args):
                 predicts = evaluator.parallel_forward(image)
                 metric.update(dst, predicts)
                 pixAcc, mIoU = metric.get()
-                tbar.set_description( 'pixAcc: %.4f, mIoU: %.4f' % (pixAcc, mIoU))
+                tbar.set_description('pixAcc: %.4f, mIoU: %.4f' % (pixAcc, mIoU))
         else:
             with torch.no_grad():
                 outputs = evaluator.parallel_forward(image)
@@ -88,6 +89,7 @@ def test(args):
                 mask = utils.get_mask_pallete(predict, args.dataset)
                 outname = os.path.splitext(impath)[0] + '.png'
                 mask.save(os.path.join(outdir, outname))
+
 
 if __name__ == "__main__":
     args = Options().parse()

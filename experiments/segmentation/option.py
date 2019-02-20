@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 
@@ -8,11 +8,12 @@ import os
 import argparse
 import torch
 
+
 class Options():
     def __init__(self):
         parser = argparse.ArgumentParser(description='PyTorch \
             Segmentation')
-        # model and dataset 
+        # model and dataset
         parser.add_argument('--model', type=str, default='encnet',
                             help='model name (default: encnet)')
         parser.add_argument('--backbone', type=str, default='resnet50',
@@ -32,11 +33,11 @@ class Options():
         parser.add_argument('--train-split', type=str, default='train',
                             help='dataset train split (default: train)')
         # training hyper params
-        parser.add_argument('--aux', action='store_true', default= False,
+        parser.add_argument('--aux', action='store_true', default=False,
                             help='Auxilary Loss')
         parser.add_argument('--aux-weight', type=float, default=0.2,
                             help='Auxilary loss weight (default: 0.2)')
-        parser.add_argument('--se-loss', action='store_true', default= False,
+        parser.add_argument('--se-loss', action='store_true', default=False,
                             help='Semantic Encoding Loss SE-loss')
         parser.add_argument('--se-weight', type=float, default=0.2,
                             help='SE-loss weight (default: 0.2)')
@@ -60,8 +61,8 @@ class Options():
         parser.add_argument('--weight-decay', type=float, default=1e-4,
                             metavar='M', help='w-decay (default: 1e-4)')
         # cuda, seed and logging
-        parser.add_argument('--no-cuda', action='store_true', default=
-                            False, help='disables CUDA training')
+        parser.add_argument('--no-cuda', action='store_true',
+                            default=False, help='disables CUDA training')
         parser.add_argument('--seed', type=int, default=1, metavar='S',
                             help='random seed (default: 1)')
         # checking point
@@ -72,18 +73,21 @@ class Options():
         parser.add_argument('--model-zoo', type=str, default=None,
                             help='evaluating on model zoo model')
         # finetuning pre-trained models
-        parser.add_argument('--ft', action='store_true', default= False,
+        parser.add_argument('--ft', action='store_true', default=False,
                             help='finetuning on a different dataset')
         # evaluation option
-        parser.add_argument('--eval', action='store_true', default= False,
+        parser.add_argument('--eval', action='store_true', default=False,
                             help='evaluating mIoU')
-        parser.add_argument('--test-val', action='store_true', default= False,
+        parser.add_argument('--test-val', action='store_true', default=False,
                             help='generate masks on val set')
-        parser.add_argument('--no-val', action='store_true', default= False,
+        parser.add_argument('--no-val', action='store_true', default=False,
                             help='skip validation during training')
         # test option
         parser.add_argument('--test-folder', type=str, default=None,
                             help='path to test image folder')
+
+        parser.add_argument('--vAOI', type=str, default='D3_UCSD',
+                            help='AOI used for validation and testing.')
         # the parser
         self.parser = parser
 
@@ -99,6 +103,8 @@ class Options():
                 'pcontext': 80,
                 'ade20k': 180,
                 'citys': 240,
+                'spacenet3': 30,
+                'spacenet8': 30,
             }
             args.epochs = epoches[args.dataset.lower()]
         if args.lr is None:
@@ -109,6 +115,8 @@ class Options():
                 'pcontext': 0.001,
                 'ade20k': 0.004,
                 'citys': 0.004,
+                'spacenet3': 0.0001,
+                'spacenet8': 0.001,
             }
             args.lr = lrs[args.dataset.lower()] / 16 * args.batch_size
         print(args)

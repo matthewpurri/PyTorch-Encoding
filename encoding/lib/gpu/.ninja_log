@@ -1,0 +1,9 @@
+# ninja log v5
+0	10697	1550680640	operator.o	3696304edbe7a2ce
+0	16436	1550690645	nms_kernel.cuda.o	acf1e602fdb079
+0	18300	1550690647	encoding_kernel.cuda.o	98f77d49f4a346d7
+0	19747	1550690649	encodingv2_kernel.cuda.o	99737b7f47c2f5a4
+0	20732	1550690650	activation_kernel.cuda.o	194b2b8adc369ac7
+0	20738	1550690650	roi_align_kernel.cuda.o	eb717c8906c6ebd6
+0	20985	1550690650	syncbn_kernel.cuda.o	9d7f7212fffc24cf
+20985	21155	1550690650	enclib_gpu.so	45ef6975e1a9ccc5

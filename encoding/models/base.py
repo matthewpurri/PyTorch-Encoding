@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 
@@ -20,6 +20,7 @@ from ..utils import batch_pix_accuracy, batch_intersection_union
 up_kwargs = {'mode': 'bilinear', 'align_corners': True}
 
 __all__ = ['BaseNet', 'MultiEvalModule']
+
 
 class BaseNet(nn.Module):
     def __init__(self, nclass, backbone, aux, se_loss, dilated=True, norm_layer=None,
@@ -87,6 +88,7 @@ class BaseNet(nn.Module):
 
 class MultiEvalModule(DataParallel):
     """Multi-size Segmentation Eavluator"""
+
     def __init__(self, module, nclass, device_ids=None, flip=True,
                  scales=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75]):
         super(MultiEvalModule, self).__init__(module, device_ids)
@@ -95,8 +97,8 @@ class MultiEvalModule(DataParallel):
         self.crop_size = module.crop_size
         self.scales = scales
         self.flip = flip
-        print('MultiEvalModule: base_size {}, crop_size {}'. \
-            format(self.base_size, self.crop_size))
+        print('MultiEvalModule: base_size {}, crop_size {}'.
+              format(self.base_size, self.crop_size))
 
     def parallel_forward(self, inputs, **kwargs):
         """Multi-GPU Mult-size Evaluation
@@ -113,7 +115,7 @@ class MultiEvalModule(DataParallel):
         elif len(kwargs) < len(inputs):
             kwargs.extend([{} for _ in range(len(inputs) - len(kwargs))])
         outputs = self.parallel_apply(replicas, inputs, kwargs)
-        #for out in outputs:
+        # for out in outputs:
         #    print('out.size()', out.size())
         return outputs
 
@@ -126,7 +128,7 @@ class MultiEvalModule(DataParallel):
         crop_size = self.crop_size
         stride = int(crop_size * stride_rate)
         with torch.cuda.device_of(image):
-            scores = image.new().resize_(batch,self.nclass,h,w).zero_().cuda()
+            scores = image.new().resize_(batch, self.nclass, h, w).zero_().cuda()
 
         for scale in self.scales:
             long_size = int(math.ceil(self.base_size * scale))
@@ -163,14 +165,14 @@ class MultiEvalModule(DataParallel):
                                         self.module.std, crop_size)
                 else:
                     pad_img = cur_img
-                _,_,ph,pw = pad_img.size()
+                _, _, ph, pw = pad_img.size()
                 assert(ph >= height and pw >= width)
                 # grid forward and normalize
                 h_grids = int(math.ceil(1.0 * (ph-crop_size)/stride)) + 1
                 w_grids = int(math.ceil(1.0 * (pw-crop_size)/stride)) + 1
                 with torch.cuda.device_of(image):
-                    outputs = image.new().resize_(batch,self.nclass,ph,pw).zero_().cuda()
-                    count_norm = image.new().resize_(batch,1,ph,pw).zero_().cuda()
+                    outputs = image.new().resize_(batch, self.nclass, ph, pw).zero_().cuda()
+                    count_norm = image.new().resize_(batch, 1, ph, pw).zero_().cuda()
                 # grid evaluation
                 for idh in range(h_grids):
                     for idw in range(w_grids):
@@ -183,12 +185,12 @@ class MultiEvalModule(DataParallel):
                         pad_crop_img = pad_image(crop_img, self.module.mean,
                                                  self.module.std, crop_size)
                         output = module_inference(self.module, pad_crop_img, self.flip)
-                        outputs[:,:,h0:h1,w0:w1] += crop_image(output,
-                            0, h1-h0, 0, w1-w0)
-                        count_norm[:,:,h0:h1,w0:w1] += 1
-                assert((count_norm==0).sum()==0)
+                        outputs[:, :, h0:h1, w0:w1] += crop_image(output,
+                                                                  0, h1-h0, 0, w1-w0)
+                        count_norm[:, :, h0:h1, w0:w1] += 1
+                assert((count_norm == 0).sum() == 0)
                 outputs = outputs / count_norm
-                outputs = outputs[:,:,:height,:width]
+                outputs = outputs[:, :, :height, :width]
 
             score = resize_image(outputs, h, w, **self.module._up_kwargs)
             scores += score
@@ -204,27 +206,31 @@ def module_inference(module, image, flip=True):
         output += flip_image(foutput)
     return output.exp()
 
+
 def resize_image(img, h, w, **up_kwargs):
     return F.interpolate(img, (h, w), **up_kwargs)
 
+
 def pad_image(img, mean, std, crop_size):
-    b,c,h,w = img.size()
-    assert(c==3)
+    b, c, h, w = img.size()
+    assert(c == 3)
     padh = crop_size - h if h < crop_size else 0
     padw = crop_size - w if w < crop_size else 0
     pad_values = -np.array(mean) / np.array(std)
-    img_pad = img.new().resize_(b,c,h+padh,w+padw)
+    img_pad = img.new().resize_(b, c, h+padh, w+padw)
     for i in range(c):
         # note that pytorch pad params is in reversed orders
-        img_pad[:,i,:,:] = F.pad(img[:,i,:,:], (0, padw, 0, padh), value=pad_values[i])
-    assert(img_pad.size(2)>=crop_size and img_pad.size(3)>=crop_size)
+        img_pad[:, i, :, :] = F.pad(img[:, i, :, :], (0, padw, 0, padh), value=pad_values[i])
+    assert(img_pad.size(2) >= crop_size and img_pad.size(3) >= crop_size)
     return img_pad
 
+
 def crop_image(img, h0, h1, w0, w1):
-    return img[:,:,h0:h1,w0:w1]
+    return img[:, :, h0:h1, w0:w1]
+
 
 def flip_image(img):
-    assert(img.dim()==4)
+    assert(img.dim() == 4)
     with torch.cuda.device_of(img):
         idx = torch.arange(img.size(3)-1, -1, -1).type_as(img).long()
     return img.index_select(3, idx)

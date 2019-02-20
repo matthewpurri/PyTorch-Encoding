@@ -9,6 +9,8 @@ from .pcontext import ContextSegmentation
 from .cityscapes import CitySegmentation
 from .imagenet import ImageNetDataset
 from .minc import MINCDataset
+from .spacenet3 import SpaceNet3Segmentation
+from .spacenet8 import SpaceNet8Segmentation
 
 from ..utils import EncodingDeprecationWarning
 
@@ -22,21 +24,27 @@ datasets = {
     'imagenet': ImageNetDataset,
     'minc': MINCDataset,
     'cifar10': CIFAR10,
+    'spacenet3': SpaceNet3Segmentation,
+    'spacenet8': SpaceNet8Segmentation,
 }
 
 acronyms = {
     'coco': 'coco',
     'pascal_voc': 'voc',
     'pascal_aug': 'voc',
-    'pcontext': pcontext,
+    'pcontext': 'pcontext',
     'ade20k': 'ade',
     'citys': 'citys',
     'minc': 'minc',
     'cifar10': 'cifar10',
+    'spacenet3': 'spacenet3',
+    'spacenet8': 'spacenet8',
 }
+
 
 def get_dataset(name, **kwargs):
     return datasets[name.lower()](**kwargs)
+
 
 def _make_deprecate(meth, old_name):
     new_name = meth.__name__
@@ -54,5 +62,6 @@ def _make_deprecate(meth, old_name):
         old_name=old_name, new_name=new_name)
     deprecated_init.__name__ = old_name
     return deprecated_init
+
 
 get_segmentation_dataset = _make_deprecate(get_dataset, 'get_segmentation_dataset')
