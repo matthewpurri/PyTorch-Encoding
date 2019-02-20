@@ -13,7 +13,7 @@ from ..nn import ConcurrentModule, SyncBatchNorm
 
 from .base import BaseNet
 
-__all__ = ['FCN', 'get_fcn', 'get_fcn_resnet50_pcontext', 'get_fcn_resnet50_ade']
+__all__ = ['FCN', 'get_fcn_multi']
 
 
 class FCN(BaseNet):
@@ -112,8 +112,8 @@ class FCNHead(nn.Module):
         return self.conv5(x)
 
 
-def get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False,
-            root='~/.encoding/models', **kwargs):
+def get_fcn_multi(dataset='pascal_voc', backbone='resnet50', pretrained=False,
+                  root='~/.encoding/models', **kwargs):
     r"""FCN model from the paper `"Fully Convolutional Network for semantic segmentation"
     <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf>`_
     Parameters
@@ -139,41 +139,41 @@ def get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False,
     return model
 
 
-def get_fcn_resnet50_pcontext(pretrained=False, root='~/.encoding/models', **kwargs):
-    r"""EncNet-PSP model from the paper `"Context Encoding for Semantic Segmentation"
-    <https://arxiv.org/pdf/1803.08904.pdf>`_
-
-    Parameters
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.encoding/models'
-        Location for keeping the model parameters.
-
-
-    Examples
-    --------
-    >>> model = get_fcn_resnet50_pcontext(pretrained=True)
-    >>> print(model)
-    """
-    return get_fcn('pcontext', 'resnet50', pretrained, root=root, aux=False, **kwargs)
-
-
-def get_fcn_resnet50_ade(pretrained=False, root='~/.encoding/models', **kwargs):
-    r"""EncNet-PSP model from the paper `"Context Encoding for Semantic Segmentation"
-    <https://arxiv.org/pdf/1803.08904.pdf>`_
-
-    Parameters
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.encoding/models'
-        Location for keeping the model parameters.
-
-
-    Examples
-    --------
-    >>> model = get_fcn_resnet50_ade(pretrained=True)
-    >>> print(model)
-    """
-    return get_fcn('ade20k', 'resnet50', pretrained, root=root, **kwargs)
+# def get_fcn_resnet50_pcontext(pretrained=False, root='~/.encoding/models', **kwargs):
+#     r"""EncNet-PSP model from the paper `"Context Encoding for Semantic Segmentation"
+#     <https://arxiv.org/pdf/1803.08904.pdf>`_
+#
+#     Parameters
+#     ----------
+#     pretrained : bool, default False
+#         Whether to load the pretrained weights for model.
+#     root : str, default '~/.encoding/models'
+#         Location for keeping the model parameters.
+#
+#
+#     Examples
+#     --------
+#     >>> model = get_fcn_resnet50_pcontext(pretrained=True)
+#     >>> print(model)
+#     """
+#     return get_fcn('pcontext', 'resnet50', pretrained, root=root, aux=False, **kwargs)
+#
+#
+# def get_fcn_resnet50_ade(pretrained=False, root='~/.encoding/models', **kwargs):
+#     r"""EncNet-PSP model from the paper `"Context Encoding for Semantic Segmentation"
+#     <https://arxiv.org/pdf/1803.08904.pdf>`_
+#
+#     Parameters
+#     ----------
+#     pretrained : bool, default False
+#         Whether to load the pretrained weights for model.
+#     root : str, default '~/.encoding/models'
+#         Location for keeping the model parameters.
+#
+#
+#     Examples
+#     --------
+#     >>> model = get_fcn_resnet50_ade(pretrained=True)
+#     >>> print(model)
+#     """
+#     return get_fcn('ade20k', 'resnet50', pretrained, root=root, **kwargs)

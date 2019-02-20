@@ -26,6 +26,7 @@ class BasicBlock(nn.Module):
     """ResNet BasicBlock
     """
     expansion = 1
+
     def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, previous_dilation=1,
                  norm_layer=None):
         super(BasicBlock, self).__init__()
@@ -63,6 +64,7 @@ class Bottleneck(nn.Module):
     """
     # pylint: disable=unused-argument
     expansion = 4
+
     def __init__(self, inplanes, planes, stride=1, dilation=1,
                  downsample=None, previous_dilation=1, norm_layer=None):
         super(Bottleneck, self).__init__()
@@ -135,13 +137,14 @@ class ResNet(nn.Module):
         - Yu, Fisher, and Vladlen Koltun. "Multi-scale context aggregation by dilated convolutions."
     """
     # pylint: disable=unused-variable
+
     def __init__(self, block, layers, num_classes=1000, dilated=False, multi_grid=False,
-                 deep_base=True, norm_layer=nn.BatchNorm2d):
+                 deep_base=True, norm_layer=nn.BatchNorm2d, input_channels=3):
         self.inplanes = 128 if deep_base else 64
         super(ResNet, self).__init__()
         if deep_base:
             self.conv1 = nn.Sequential(
-                nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False),
+                nn.Conv2d(input_channels, 64, kernel_size=3, stride=2, padding=1, bias=False),
                 norm_layer(64),
                 nn.ReLU(inplace=True),
                 nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False),
@@ -150,7 +153,7 @@ class ResNet(nn.Module):
                 nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False),
             )
         else:
-            self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
+            self.conv1 = nn.Conv2d(input_channels, 64, kernel_size=7, stride=2, padding=3,
                                    bias=False)
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)

@@ -31,9 +31,18 @@ class Trainer():
     def __init__(self, args):
         self.args = args
         # data transforms
-        input_transform = transform.Compose([
-            transform.ToTensor(),
-            transform.Normalize([.485, .456, .406], [.229, .224, .225])])
+        if args.dataset == 'spacenet3':
+            input_transform = transform.Compose([
+                transform.ToTensor(),
+                transform.Normalize([30.62376251, 32.91887047, 37.10728539],
+                                    [5.63315354, 4.83984302, 4.3965623])])
+        elif args.dataset == 'spacenet8':
+            input_transform = transform.Compose([
+                transform.ToTensor()])
+        else:
+            input_transform = transform.Compose([
+                transform.ToTensor(),
+                transform.Normalize([.485, .456, .406], [.229, .224, .225])])
         # dataset
         data_kwargs = {'transform': input_transform, 'base_size': args.base_size,
                        'crop_size': args.crop_size, 'vAOI': args.vAOI}
@@ -50,10 +59,17 @@ class Trainer():
                                          drop_last=False, shuffle=False, **kwargs)
         self.nclass = trainset.num_class
         # model
-        model = get_segmentation_model(args.model, dataset=args.dataset,
-                                       backbone=args.backbone, aux=args.aux,
-                                       se_loss=args.se_loss, norm_layer=SyncBatchNorm,
-                                       base_size=args.base_size, crop_size=args.crop_size)
+        if args.dataset == 'spacenet8':
+            model = get_segmentation_model(args.model, dataset=args.dataset,
+                                           backbone=args.backbone, aux=args.aux,
+                                           se_loss=args.se_loss, norm_layer=SyncBatchNorm,
+                                           base_size=args.base_size, crop_size=args.crop_size,
+                                           input_channels=8)
+        else:
+            model = get_segmentation_model(args.model, dataset=args.dataset,
+                                           backbone=args.backbone, aux=args.aux,
+                                           se_loss=args.se_loss, norm_layer=SyncBatchNorm,
+                                           base_size=args.base_size, crop_size=args.crop_size)
         # print(model)
         # optimizer using different LR
         params_list = [{'params': model.pretrained.parameters(), 'lr': args.lr}, ]
