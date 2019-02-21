@@ -4,10 +4,11 @@ from .resnet import *
 from .cifarresnet import *
 from .base import *
 from .fcn import *
-from .fcn_multi import *
+from .fcn_ms import *
 from .psp import *
 from .encnet import *
 from .deeplab import *
+from .mvcnet import *
 
 
 def get_segmentation_model(name, **kwargs):
@@ -22,9 +23,10 @@ def get_segmentation_model(name, **kwargs):
     # }
     models = {
         'fcn': get_fcn,
-        'fcn_multi': get_fcn_multi,
+        'fcn_ms': get_fcn_ms,
         'psp': get_psp,
         'encnet': get_encnet,
         'deeplab': get_deeplab,
+        'mvcnet': get_mvcnet,
     }
     return models[name.lower()](**kwargs)

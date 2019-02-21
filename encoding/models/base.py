@@ -26,7 +26,7 @@ class BaseNet(nn.Module):
     def __init__(self, nclass, backbone, aux, se_loss, dilated=True, norm_layer=None,
                  base_size=520, crop_size=480, mean=[.485, .456, .406],
                  std=[.229, .224, .225], root='~/.encoding/models',
-                 input_channels=3):
+                 input_channels=3, multi_res_loss=False):
         super(BaseNet, self).__init__()
         self.nclass = nclass
         self.aux = aux
@@ -35,6 +35,7 @@ class BaseNet(nn.Module):
         self.std = std
         self.base_size = base_size
         self.crop_size = crop_size
+        self.multi_res_loss = multi_res_loss
         # copying modules from pretrained models
         self.backbone = backbone
         if backbone == 'resnet50':

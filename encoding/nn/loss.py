@@ -11,18 +11,33 @@ class SegmentationLosses(nn.CrossEntropyLoss):
 
     def __init__(self, se_loss=False, se_weight=0.2, nclass=-1,
                  aux=False, aux_weight=0.4, weight=None,
-                 ignore_index=0):
+                 ignore_index=0, multi_res_loss=False, multi_res_weight=0.3):
         super(SegmentationLosses, self).__init__(weight, None, ignore_index)
         self.se_loss = se_loss
         self.aux = aux
+        self.multi_res_loss = multi_res_loss
         self.nclass = nclass
         self.se_weight = se_weight
         self.aux_weight = aux_weight
+        self.MRW = multi_res_weight
         self.bceloss = nn.BCELoss(weight)
 
     def forward(self, *inputs):
-        if not self.se_loss and not self.aux:
+        if not self.se_loss and not self.aux and not self.multi_res_loss:
             return super(SegmentationLosses, self).forward(*inputs)
+        elif self.multi_res_loss is True:
+            final, out1, out2, out3, out4, target = tuple(inputs)
+            up1 = F.interpolate(out1, target.size()[-2:], mode='bilinear', align_corners=True)
+            up2 = F.interpolate(out2, target.size()[-2:], mode='bilinear', align_corners=True)
+            up3 = F.interpolate(out3, target.size()[-2:], mode='bilinear', align_corners=True)
+            up4 = F.interpolate(out4, target.size()[-2:], mode='bilinear', align_corners=True)
+            loss1 = super(SegmentationLosses, self).forward(up1, target)
+            loss2 = super(SegmentationLosses, self).forward(up2, target)
+            loss3 = super(SegmentationLosses, self).forward(up3, target)
+            loss4 = super(SegmentationLosses, self).forward(up4, target)
+            lossF = super(SegmentationLosses, self).forward(final, target)
+            return lossF + self.MRW * loss4 + self.MRW * loss3 * (3/4) + \
+                self.MRW * loss2 * (1/2) + self.MRW * loss4 * (1/4)
         elif not self.se_loss:
             pred1, pred2, target = tuple(inputs)
             loss1 = super(SegmentationLosses, self).forward(pred1, target)

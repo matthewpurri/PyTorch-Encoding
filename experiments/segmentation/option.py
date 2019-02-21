@@ -88,6 +88,12 @@ class Options():
 
         parser.add_argument('--vAOI', type=str, default='D3_UCSD',
                             help='AOI used for validation and testing.')
+
+        parser.add_argument('--multi-res-loss', action='store_true',
+                            default=False,
+                            help='Use multi-resolution loss.')
+        parser.add_argument('--multi-res-weight', type=float, default=0.1,
+                            help='Weight for multi-res loss.')
         # the parser
         self.parser = parser
 

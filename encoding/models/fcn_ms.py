@@ -13,7 +13,7 @@ from ..nn import ConcurrentModule, SyncBatchNorm
 
 from .base import BaseNet
 
-__all__ = ['FCN', 'get_fcn_multi']
+__all__ = ['FCN', 'get_fcn_ms']
 
 
 class FCN(BaseNet):
@@ -112,8 +112,8 @@ class FCNHead(nn.Module):
         return self.conv5(x)
 
 
-def get_fcn_multi(dataset='pascal_voc', backbone='resnet50', pretrained=False,
-                  root='~/.encoding/models', **kwargs):
+def get_fcn_ms(dataset='pascal_voc', backbone='resnet50', pretrained=False,
+               root='~/.encoding/models', **kwargs):
     r"""FCN model from the paper `"Fully Convolutional Network for semantic segmentation"
     <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf>`_
     Parameters
@@ -135,7 +135,7 @@ def get_fcn_multi(dataset='pascal_voc', backbone='resnet50', pretrained=False,
     if pretrained:
         from .model_store import get_model_file
         model.load_state_dict(torch.load(
-            get_model_file('fcn_%s_%s' % (backbone, acronyms[dataset]), root=root)))
+            get_model_file('fcn_ms_%s_%s' % (backbone, acronyms[dataset]), root=root)))
     return model
 
 

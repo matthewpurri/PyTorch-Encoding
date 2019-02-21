@@ -15,7 +15,7 @@ import torchvision.transforms as transform
 from torch.nn.parallel.scatter_gather import gather
 
 import encoding.utils as utils
-from encoding.nn import SegmentationLosses, SyncBatchNorm, OHEMSegmentationLosses
+from encoding.nn import SegmentationLosses, SyncBatchNorm
 from encoding.parallel import DataParallelModel, DataParallelCriterion
 from encoding.datasets import get_dataset
 from encoding.models import get_segmentation_model
@@ -64,12 +64,13 @@ class Trainer():
                                            backbone=args.backbone, aux=args.aux,
                                            se_loss=args.se_loss, norm_layer=SyncBatchNorm,
                                            base_size=args.base_size, crop_size=args.crop_size,
-                                           input_channels=8)
+                                           input_channels=8, multi_res_loss=args.multi_res_loss)
         else:
             model = get_segmentation_model(args.model, dataset=args.dataset,
                                            backbone=args.backbone, aux=args.aux,
                                            se_loss=args.se_loss, norm_layer=SyncBatchNorm,
-                                           base_size=args.base_size, crop_size=args.crop_size)
+                                           base_size=args.base_size, crop_size=args.crop_size,
+                                           input_channels=3, multi_res_loss=args.multi_res_loss)
         # print(model)
         # optimizer using different LR
         params_list = [{'params': model.pretrained.parameters(), 'lr': args.lr}, ]
@@ -84,7 +85,9 @@ class Trainer():
                                             aux=args.aux,
                                             nclass=self.nclass,
                                             se_weight=args.se_weight,
-                                            aux_weight=args.aux_weight)
+                                            aux_weight=args.aux_weight,
+                                            multi_res_loss=args.multi_res_loss,
+                                            multi_res_weight=args.multi_res_weight)
         self.model, self.optimizer = model, optimizer
         # using cuda
         if args.cuda:
@@ -211,7 +214,7 @@ if __name__ == "__main__":
         trainer.validation(trainer.args.start_epoch)
     else:
         for epoch in range(trainer.args.start_epoch, trainer.args.epochs):
-            trainer.validation(epoch)
+            # trainer.validation(epoch)
             trainer.training(epoch)
             if not trainer.args.no_val:
                 trainer.validation(epoch)
