@@ -180,7 +180,7 @@ class Trainer():
             total_f1 += mF1
 
         new_pred = (pixAcc + mIoU)/2
-        total_f1 /= total_label
+        total_f1 /= len(self.valloader)
         if new_pred > self.best_pred:
             is_best = True
             self.best_pred = new_pred
