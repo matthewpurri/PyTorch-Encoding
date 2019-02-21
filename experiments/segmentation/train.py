@@ -112,6 +112,9 @@ class Trainer():
         self.scheduler = utils.LR_Scheduler(args.lr_scheduler, args.lr,
                                             args.epochs, len(self.trainloader))
         self.best_pred = 0.0
+        self.best_mF1 = 0.0
+        self.best_pixAcc = 0.0
+        self.best_mIoU = 0.0
 
     def training(self, epoch):
         train_loss = 0.0
@@ -149,19 +152,21 @@ class Trainer():
             target = target.cuda()
             correct, labeled = utils.batch_pix_accuracy(pred.data, target)
             inter, union = utils.batch_intersection_union(pred.data, target, self.nclass)
-            return correct, labeled, inter, union
+            mF1 = utils.batch_f1_score(pred.data, target, self.nclass)
+            return correct, labeled, inter, union, mF1
 
         is_best = False
         self.model.eval()
         total_inter, total_union, total_correct, total_label = 0, 0, 0, 0
+        total_f1 = 0
         tbar = tqdm(self.valloader, desc='\r')
         for i, (image, target) in enumerate(tbar):
             if torch_ver == "0.3":
                 image = Variable(image, volatile=True)
-                correct, labeled, inter, union = eval_batch(self.model, image, target)
+                correct, labeled, inter, union, mF1 = eval_batch(self.model, image, target)
             else:
                 with torch.no_grad():
-                    correct, labeled, inter, union = eval_batch(self.model, image, target)
+                    correct, labeled, inter, union, mF1 = eval_batch(self.model, image, target)
 
             total_correct += correct
             total_label += labeled
@@ -171,12 +176,23 @@ class Trainer():
             IoU = 1.0 * total_inter / (np.spacing(1) + total_union)
             mIoU = IoU.mean()
             tbar.set_description(
-                'pixAcc: %.3f, mIoU: %.3f' % (pixAcc, mIoU))
+                'pixAcc: %.3f, mIoU: %.3f, mF1: %.3f' % (pixAcc, mIoU, mF1))
+            total_f1 += mF1
 
         new_pred = (pixAcc + mIoU)/2
+        total_f1 /= total_label
         if new_pred > self.best_pred:
             is_best = True
             self.best_pred = new_pred
+        if self.best_pixAcc < pixAcc:
+            self.best_pixAcc = pixAcc
+        if self.best_mIoU < mIoU:
+            self.best_mIoU = mIoU
+        if self.best_mF1 < total_f1:
+            self.best_mF1 = total_f1
+        print('\nBest: pixAcc: {0:1.4f} | mIoU: {1:1.4f} | mF1: {2:1.4f} |\n'.format(self.best_pixAcc,
+                                                                                     self.best_mIoU,
+                                                                                     self.best_mF1))
         utils.save_checkpoint({
             'epoch': epoch + 1,
             'state_dict': self.model.module.state_dict(),
@@ -195,6 +211,7 @@ if __name__ == "__main__":
         trainer.validation(trainer.args.start_epoch)
     else:
         for epoch in range(trainer.args.start_epoch, trainer.args.epochs):
+            trainer.validation(epoch)
             trainer.training(epoch)
             if not trainer.args.no_val:
                 trainer.validation(epoch)
