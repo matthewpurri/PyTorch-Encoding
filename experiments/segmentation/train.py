@@ -34,8 +34,8 @@ class Trainer():
         if args.dataset == 'spacenet3':
             input_transform = transform.Compose([
                 transform.ToTensor(),
-                transform.Normalize([30.62376251, 32.91887047, 37.10728539],
-                                    [5.63315354, 4.83984302, 4.3965623])])
+                transform.Normalize([30.24584637, 32.54369452, 36.74206311],
+                                    [5.94954947, 5.04209975, 4.56778059])])
         elif args.dataset == 'spacenet8':
             input_transform = transform.Compose([
                 transform.ToTensor()])

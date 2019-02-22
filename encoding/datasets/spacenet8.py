@@ -21,10 +21,10 @@ class SpaceNet8Segmentation(BaseDataset):
         if len(self.image_paths) == 0:
             raise RuntimeError('No images found for dataset.')
 
-        self.mean = np.array([0.18094316, 0.14748598, 0.13105371, 0.12299054,
-                              0.12206793, 0.15064667, 0.20301871, 0.17515286])
-        self.std = np.array([0.01328016, 0.01727851, 0.01898905, 0.02020103,
-                             0.02213562, 0.01794383, 0.02000385, 0.01669906])
+        self.mean = np.array([0.17976709, 0.14604979, 0.12958227, 0.12154269,
+                              0.12058717, 0.15053372, 0.20465892, 0.17688832])
+        self.std = np.array([0.01374693, 0.01794317, 0.01978368, 0.02123186,
+                             0.02336325, 0.01905434, 0.02147162, 0.01790122])
 
     def __getitem__(self, index):
         img = gdal.Open(self.image_paths[index]).ReadAsArray()
