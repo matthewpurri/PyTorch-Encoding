@@ -214,7 +214,6 @@ if __name__ == "__main__":
         trainer.validation(trainer.args.start_epoch)
     else:
         for epoch in range(trainer.args.start_epoch, trainer.args.epochs):
-            # trainer.validation(epoch)
             trainer.training(epoch)
             if not trainer.args.no_val:
                 trainer.validation(epoch)

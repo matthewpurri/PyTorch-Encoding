@@ -36,8 +36,10 @@ class SegmentationLosses(nn.CrossEntropyLoss):
             loss3 = super(SegmentationLosses, self).forward(up3, target)
             loss4 = super(SegmentationLosses, self).forward(up4, target)
             lossF = super(SegmentationLosses, self).forward(final, target)
-            return lossF + self.MRW * loss4 + self.MRW * loss3 * (3/4) + \
-                self.MRW * loss2 * (1/2) + self.MRW * loss4 * (1/4)
+            # return lossF + self.MRW * loss4 + self.MRW * loss3 * (3/4) + \
+            #     self.MRW * loss2 * (1/2) + self.MRW * loss1 * (1/4)
+            return lossF + self.MRW * loss4 + self.MRW * loss3 + self.MRW \
+                * loss2 + self.MRW * loss1
         elif not self.se_loss:
             pred1, pred2, target = tuple(inputs)
             loss1 = super(SegmentationLosses, self).forward(pred1, target)

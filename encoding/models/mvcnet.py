@@ -30,23 +30,25 @@ class MVCNet(BaseNet):
             nn.BatchNorm2d(64),
             nn.ReLU()
         )
-        self.final = nn.Conv2d(64, nclass, kernel_size=1)
+        # self.final = nn.Conv2d(64, nclass, kernel_size=1)
+        self.final = nn.Conv2d(800, nclass, kernel_size=3, padding=1)
 
     def forward(self, x):
         _, _, _, c4 = self.base_forward(x)
 
         # Save each upsampling of the output feature maps
         # c4 = nn.upsample(c4)
-        center = self.center(c4)
-        out_C = self.classC(center)
-        dec4 = self.dec4(center)
-        out_4 = self.class4(dec4)
-        dec3 = self.dec3(dec4)
-        out_3 = self.class3(dec3)
-        dec2 = self.dec2(dec3)
-        out_2 = self.class2(dec2)
-        dec1 = self.dec1(dec2)
-        final = self.final(dec1)
+        final = self.center(c4)
+        # center = self.center(c4)
+        # out_C = self.classC(center)
+        # dec4 = self.dec4(center)
+        # out_4 = self.class4(dec4)
+        # dec3 = self.dec3(dec4)
+        # out_3 = self.class3(dec3)
+        # dec2 = self.dec2(dec3)
+        # out_2 = self.class2(dec2)
+        # dec1 = self.dec1(dec2)
+        final = self.final(final)
         final = F.interpolate(final, x.size()[2:],
                               mode='bilinear', align_corners=True)
         output = [final]
@@ -82,10 +84,11 @@ class _ClassifierBlock(nn.Module):
     def __init__(self, in_channels, nclasses):
         super(_ClassifierBlock, self).__init__()
         self.classifier = nn.Sequential(
-            nn.Conv2d(in_channels, in_channels//2, kernel_size=3),
-            nn.BatchNorm2d(in_channels//2),
+            nn.Conv2d(in_channels, in_channels//4, kernel_size=3, bias=False),
+            nn.BatchNorm2d(in_channels//4),
             nn.ReLU(),
-            nn.Conv2d(in_channels//2, nclasses, kernel_size=3)
+            nn.Dropout2d(0.1, False),
+            nn.Conv2d(in_channels//4, nclasses, kernel_size=3, bias=False)
         )
 
     def forward(self, x):
