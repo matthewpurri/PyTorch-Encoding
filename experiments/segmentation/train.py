@@ -182,8 +182,8 @@ class Trainer():
                 'pixAcc: %.3f, mIoU: %.3f, mF1: %.3f' % (pixAcc, mIoU, mF1))
             total_f1 += mF1
 
-        new_pred = (pixAcc + mIoU)/2
         total_f1 /= len(self.valloader)
+        new_pred = (pixAcc + mIoU + total_f1)/2
         if new_pred > self.best_pred:
             is_best = True
             self.best_pred = new_pred
