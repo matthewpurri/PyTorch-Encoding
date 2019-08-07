@@ -11,7 +11,7 @@ class SpaceNet3Segmentation(BaseDataset):
     NUM_CLASS = 12
     NUM_CHANNELS = 3
 
-    def __init__(self, root='/media/purri/250GB/SpaceNet/3_Band/', split='train',
+    def __init__(self, root='/media/Data_Drive/SpaceNet/3_Band/', split='train',
                  mode=None, transform=None, target_transform=None,
                  **kwargs):
         super(SpaceNet3Segmentation, self).__init__(root, split, **kwargs)
